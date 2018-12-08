@@ -1,5 +1,5 @@
 import hapticdrv2605.hapticdrv2605;
-      
+    
 
 
         I2cDevice mDevice;
@@ -21,6 +21,29 @@ import hapticdrv2605.hapticdrv2605;
             hapticdrv2605_device.drv2605_Play_Waveform((byte)effect);
             //Play the effect
             hapticdrv2605_device.drv2605_go_enable();//Bit clears after played
+
+            do {
+
+                Log.d("HAPTIC I2C", "I2C HAPTIC EFFECT NUMBER: " + effect);
+
+                // set the effect to play
+                hapticdrv2605_device.drv2605_Play_Waveform((byte)effect);
+                hapticdrv2605_device.SET_LIBRARYSELECT_REGISTER((byte)0x00);// end waveform
+
+                //Play the effect
+                hapticdrv2605_device.drv2605_go_enable();//Bit clears after played
+
+                // wait a bit
+                try {
+                    TimeUnit.MICROSECONDS.sleep(500);//wait 500 us
+                }
+                catch(Exception ex) {
+                }
+
+                effect++;
+
+            }
+            while (effect<=116);
         }
         catch (Exception ex){
             Log.d(TAG, "Haptic I2C - MainActivity - problem attaching to device.: " + ex.toString());
