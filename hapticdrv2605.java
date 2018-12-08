@@ -347,13 +347,66 @@ slave address will cause all haptic drivers to trigger the process  at the same 
                 //Auto calibration results written to status register 0x00 bit 3
                 //Read status register
                 byte status = mI2cDevice.readRegByte(STATUS_REG);//Read the diag results to ensure auto calibration is completed without faults.
-                Log.d("HAPTIC I2C", "Read I2C DRV 2605 status byte: 0x" + String.format("%02X", status));//0xE0 should be good
+                if (status == (byte)0xE0) {
+                    Log.d("HAPTIC I2C", "Read I2C DRV 2605 status byte: 0x" + String.format("%02X", status) + " Healthy Device");//0xE0 should be good
+                }
+                else if(status == (byte)0xFF){
+                    //Auto Calibration Failed - Actuator Not present
+                    //Feedback Controller has timed out.
+                    //Device Exceeded Temperature threshold
+                    //Overcurrent event detected
+                    Log.d("HAPTIC I2C", "Read I2C DRV 2605 status byte: 0x" + String.format("%02X", status) + " Faulty Device");//0xE0 should be good
+                    Log.d("HAPTIC I2C", "I2C Auto Calibration Failed - Actuator Not present. ");
+                    Log.d("HAPTIC I2C", "I2C Feedback controller timed out.");
+                    Log.d("HAPTIC I2C", "I2C Device Exceeded Temperature Threshold");
+                    Log.d("HAPTIC I2C", "I2C Overcurrent event detected.");
+                }
+                else if(status == (byte)0xEF){
+                    //Auto Calibration Failed - Actuator Not present
+                    //Feedback Controller has timed out.
+                    //Device Exceeded Temperature threshold
+                    //Overcurrent event detected
+                    Log.d("HAPTIC I2C", "Read I2C DRV 2605 status byte: 0x" + String.format("%02X", status) + " Faulty Device");//0xE0 should be good
+                    Log.d("HAPTIC I2C", "I2C Auto Calibration Failed - Actuator Not present. ");
+                    Log.d("HAPTIC I2C", "I2C Feedback controller timed out.");
+                    Log.d("HAPTIC I2C", "I2C Device Exceeded Temperature Threshold");
+                    Log.d("HAPTIC I2C", "I2C Overcurrent event detected.");
+                }
+                else if(status == (byte)0xE7){
+                    //Auto Calibration Failed - Actuator Not present
+                    //Feedback Controller has timed out.
+                    //Device Exceeded Temperature threshold
+                    //Overcurrent event detected
+                    Log.d("HAPTIC I2C", "Read I2C DRV 2605 status byte: 0x" + String.format("%02X", status) + " Faulty Device");//0xE0 should be good
+                    Log.d("HAPTIC I2C", "I2C Auto Calibration PASSED ");
+                    Log.d("HAPTIC I2C", "I2C Feedback controller timed out.");
+                    Log.d("HAPTIC I2C", "I2C Device Exceeded Temperature Threshold");
+                    Log.d("HAPTIC I2C", "I2C Overcurrent event detected.");
+                }
+                else if(status == (byte)0xE8){
+                    Log.d("HAPTIC I2C", "Read I2C DRV 2605 status byte: 0x" + String.format("%02X", status) + " Faulty Device");//0xE0 should be good
+                    Log.d("HAPTIC I2C", "I2C Auto Calibration Failed - Actuator Not present. ");
+                }
+                else if(status == (byte)0xE4){
+                    Log.d("HAPTIC I2C", "Read I2C DRV 2605 status byte: 0x" + String.format("%02X", status) + " Faulty Device");//0xE0 should be good
+                    Log.d("HAPTIC I2C", "I2C Feedback controller timed out.");
+                }
+                else if(status == (byte)0xE2){
+                    Log.d("HAPTIC I2C", "Read I2C DRV 2605 status byte: 0x" + String.format("%02X", status) + " Faulty Device");//0xE0 should be good
+                    Log.d("HAPTIC I2C", "I2C Device Exceeded Temperature Threshold");
+                 }
+                else if(status == (byte)0xE1){
+                    Log.d("HAPTIC I2C", "Read I2C DRV 2605 status byte: 0x" + String.format("%02X", status) + " Faulty Device");//0xE0 should be good
+                    Log.d("HAPTIC I2C", "I2C Overcurrent event detected.");
+                }
+                else{
+                    Log.d("HAPTIC I2C", "Read I2C DRV 2605 status byte: 0x" + String.format("%02X", status) + " Defective Device");
+                }
+
                 //Write the library selection (0x03) to select a library
                 mI2cDevice.writeRegByte(LIBRARY_SELECT_REG, (byte) 0);
 
                 //The default setup is closed loop bi-directional mode.
-
-
                 //Put the device in standby mode ie deassert EN pin, the user can select the desired MODE (0x01) at the same time the STANDBY bit is set.
                 mI2cDevice.writeRegByte(MODE_REG, (byte) 0x01000000);//0x40 standby 1=Device in Software Standby
            // }
@@ -400,7 +453,7 @@ slave address will cause all haptic drivers to trigger the process  at the same 
         mI2cDevice.writeRegByte(RTP_INPUT_REG, (byte) value);
     }
 
-    private void SET_LIBRARYSELECT_REGISTER(byte value) throws IOException {
+    public void SET_LIBRARYSELECT_REGISTER(byte value) throws IOException {
         if (mI2cDevice == null) {
             throw new IllegalStateException("DRV2605 - I2C device not open");
         }
