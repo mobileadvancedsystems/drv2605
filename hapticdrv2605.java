@@ -347,7 +347,7 @@ slave address will cause all haptic drivers to trigger the process  at the same 
                 //Auto calibration results written to status register 0x00 bit 3
                 //Read status register
                 byte status = mI2cDevice.readRegByte(STATUS_REG);//Read the diag results to ensure auto calibration is completed without faults.
-                if (status == (byte)0xE0) {
+                if ((status == (byte)0xE0)||(status == (byte)0xE4)) {
                     Log.d("HAPTIC I2C", "Read I2C DRV 2605 status byte: 0x" + String.format("%02X", status) + " Healthy Device");//0xE0 should be good
                 }
                 else if(status == (byte)0xFF){
@@ -387,10 +387,12 @@ slave address will cause all haptic drivers to trigger the process  at the same 
                     Log.d("HAPTIC I2C", "Read I2C DRV 2605 status byte: 0x" + String.format("%02X", status) + " Faulty Device");//0xE0 should be good
                     Log.d("HAPTIC I2C", "I2C Auto Calibration Failed - Actuator Not present. ");
                 }
-                else if(status == (byte)0xE4){
-                    Log.d("HAPTIC I2C", "Read I2C DRV 2605 status byte: 0x" + String.format("%02X", status) + " Faulty Device");//0xE0 should be good
-                    Log.d("HAPTIC I2C", "I2C Feedback controller timed out.");
-                }
+                //else if(status == (byte)0xE4){
+                    //This bit is for debug purposes only, and may sometimes be set
+                    //under normal operation when extensive braking periods are used.
+                //    Log.d("HAPTIC I2C", "Read I2C DRV 2605 status byte: 0x" + String.format("%02X", status) + " Faulty Device");//0xE0 should be good
+                //    Log.d("HAPTIC I2C", "I2C Feedback controller timed out. This maybe ok.");
+                //}
                 else if(status == (byte)0xE2){
                     Log.d("HAPTIC I2C", "Read I2C DRV 2605 status byte: 0x" + String.format("%02X", status) + " Faulty Device");//0xE0 should be good
                     Log.d("HAPTIC I2C", "I2C Device Exceeded Temperature Threshold");
