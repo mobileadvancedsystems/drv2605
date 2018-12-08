@@ -1,4 +1,7 @@
+import hapticdrv2605.hapticdrv2605;
       
+
+
         I2cDevice mDevice;
         try {
             int effect=1;
