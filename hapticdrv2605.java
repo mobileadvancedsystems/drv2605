@@ -266,8 +266,7 @@ slave address will cause all haptic drivers to trigger the process  at the same 
 
 
             // check status of DIAG_RESULT (3rd bit) in register 0x00 (=DRV2605_REG_STATUS)
-            //uint8_t res = drv.readRegister8(DRV2605_REG_STATUS) & 0x08;
-            //int statusreg=mI2cDevice.readRegByte(STATUS_REG)&0x08;
+             //int statusreg=mI2cDevice.readRegByte(STATUS_REG)&0x08;
             //byte status = mI2cDevice.readRegByte(STATUS_REG);//Read the diag results to ensure auto calibration is completed without faults.
 
             //Log.d("HAPTIC I2C", "Read I2C DRV 2605 status byte: 0x" + Integer.toHexString(statusreg));//0xE0 should be good
@@ -287,7 +286,7 @@ slave address will cause all haptic drivers to trigger the process  at the same 
             // boolean test=false;
             //  if (test) {
                 //Write the mode register (0x01) a value of 0x00 to remove the device from standby mode. 0=Device Ready
-                mI2cDevice.writeRegByte(MODE_REG, (byte) 0);
+                mI2cDevice.writeRegByte(MODE_REG, (byte) 0x00);
 
                 //Auto Calibration Procedure - this depends on the type of haptic motor you use.
 
@@ -300,36 +299,44 @@ slave address will cause all haptic drivers to trigger the process  at the same 
                 //and the ERM_OPEN_LOOP bit to 1 in register 0x1D.
                 //N_ERM_LRA This bit sets the DRV2605 device in ERM or LRA mode. This bit should be set prior to running auto calibration. 0: ERM Mode 1: LRA Mode
                 //mI2cDevice.writeRegByte(FEEDBACK_CONTROL_REG, (byte) 0x00000000);//0x00 - Select ERM as opposed to LRA
-                mI2cDevice.writeRegByte(CONTROL3_REG, (byte) 0x00100000);//ERM_OPEN_LOOP BIT to 1 - bit 5   readRegister8(DRV2605_REG_CONTROL3) | 0x20
+                //mI2cDevice.writeRegByte(CONTROL3_REG, (byte) 0x00100000);//ERM_OPEN_LOOP BIT to 1 - bit 5
+                mI2cDevice.writeRegByte(CONTROL3_REG, (byte) 0x20);//ERM_OPEN_LOOP BIT to 1 - bit 5
 
                 // ERM open loop
 
-                // turn off N_ERM_LRA
-                //writeRegister8(DRV2605_REG_FEEDBACK, readRegister8(DRV2605_REG_FEEDBACK) & 0x7F);
-                // turn on ERM_OPEN_LOOP
-                //writeRegister8(DRV2605_REG_CONTROL3, readRegister8(DRV2605_REG_CONTROL3) | 0x20);
+
 
 
                 //FB_BRAKE_FACTOR[2:0] 	— A value of 2:3x is valid for most actuators.
                 //mI2cDevice.writeRegByte(FEEDBACK_CONTROL_REG, (byte) 0x00100000);//   select 2:3x
 
                 //LOOP_GAIN[1:0] 	— A value of 2 is valid for most actuators.
-                mI2cDevice.writeRegByte(FEEDBACK_CONTROL_REG, (byte) 0x00101000);//0x28 Select ERM, select 2:3x, set to HIGH readRegister8(DRV2605_REG_FEEDBACK) & 0x7F  0x01111111
+                //Motor Select 0x36  =  ERM motor, 4x Braking, Medium loop gain, 1.365x back EMF gain
+                //Library effectd set to 2, 1-5 & 7 for ERM motors, 6 for LRA motors
+
+                //mI2cDevice.writeRegByte(FEEDBACK_CONTROL_REG, (byte) 0x00101000);//0x28 Select ERM, select 2:3x, set to HIGH
+                mI2cDevice.writeRegByte(FEEDBACK_CONTROL_REG, (byte) 0x7F);//0x28 Select ERM, select 2:3x, set to HIGH
 
                 //RATED_VOLTAGE[7:0] 	— See the Rated Voltage Programming section for calculating the correct register value.
-                mI2cDevice.writeRegByte(RATED_VOLTAGE_REG, (byte) EFFECT_LIBRARY_A__ERM_RATED_VOLTAGE);
+                //mI2cDevice.writeRegByte(RATED_VOLTAGE_REG, (byte) EFFECT_LIBRARY_A__ERM_RATED_VOLTAGE);
+                //mI2cDevice.writeRegByte(RATED_VOLTAGE_REG, (byte) 0x3F);
+                mI2cDevice.writeRegByte(RATED_VOLTAGE_REG, (byte) 0x56);
 
                 //OD_CLAMP[7:0] 	— See the Overdrive Voltage-Clamp Programming section for calculating the correct register value.
-                mI2cDevice.writeRegByte(OVERDRIVE_CLAMP_VOLTAGE_REG, (byte) EFFECT_LIBRARY_A__ERM_OVERDRIVE_CLAMP_VOLTAGE);
+                //mI2cDevice.writeRegByte(OVERDRIVE_CLAMP_VOLTAGE_REG, (byte) EFFECT_LIBRARY_A__ERM_OVERDRIVE_CLAMP_VOLTAGE);
+                mI2cDevice.writeRegByte(OVERDRIVE_CLAMP_VOLTAGE_REG, (byte) 0x90);
+
 
                 //AUTO_CAL_TIME[1:0] 	— A value of 3 is valid for most actuators.
-                mI2cDevice.writeRegByte(CONTROL4_REG, (byte) 0x00100000);
+                mI2cDevice.writeRegByte(CONTROL4_REG, (byte) 0x20);
 
-                //DRIVE_TIME[3:0] 	— See the Drive-Time Programming for calculating the correct register value. Drive time (ms) = DRIVE_TIME[4:0] × 0.1 ms + 0.5 ms.
+                //DRIVE_TIME[4:0] 	— See the Drive-Time Programming for calculating the correct register value. Drive time (ms) = DRIVE_TIME[4:0] × 0.1 ms + 0.5 ms.
                 //ERM Mode : Sets the sample rate for the back-EMF detection. Lower drive times cause higher peak-to-average ratios
                 //in the output signal, requiring more supply headroom. Higher drive times cause the feedback to react at a slower rate.
+                //If the bit is set too low,
+                //it can affect the actuator startup time. If it is set too high, it can cause instability.
                 //Drive Time (ms) = DRIVE_TIME[4:0] × 0.2 ms + 1 ms
-                mI2cDevice.writeRegByte(CONTROL1_REG, (byte) 0x00000010);//set arbitrary value to 2
+                mI2cDevice.writeRegByte(CONTROL1_REG, (byte) 0xB3);//set arbitrary value to 2
 
                 //SAMPLE_TIME[1:0] 	— A value of 3 is valid for most actuators.
                 //mI2cDevice.writeRegByte(CONTROL2_REG, 0x00110000);//set arbitrary value to 2
@@ -338,11 +345,11 @@ slave address will cause all haptic drivers to trigger the process  at the same 
                 //mI2cDevice.writeRegByte(CONTROL2_REG, 0x00110100);
 
                 //DISS_TIME[1:0]	— A value of 1 is valid for most actuators. Current dissipation time between PWM cycles.
-                mI2cDevice.writeRegByte(CONTROL2_REG, (byte) 0x00110101);
+                mI2cDevice.writeRegByte(CONTROL2_REG, (byte) 0xDA);
 
                 //Set the GO bit (write 0x01 to register 0x0C) to start the auto-calibration process. When auto calibration is complete, the GO bit automatically
                 //clears. The auto-calibration results are written in the respective registers
-                mI2cDevice.writeRegByte(GO_REG, (byte) 0x00000001);//0x01
+                mI2cDevice.writeRegByte(GO_REG, (byte) 0x01);//0x01
 
                 //Auto calibration results written to status register 0x00 bit 3
                 //Read status register
@@ -410,7 +417,7 @@ slave address will cause all haptic drivers to trigger the process  at the same 
 
                 //The default setup is closed loop bi-directional mode.
                 //Put the device in standby mode ie deassert EN pin, the user can select the desired MODE (0x01) at the same time the STANDBY bit is set.
-                mI2cDevice.writeRegByte(MODE_REG, (byte) 0x01000000);//0x40 standby 1=Device in Software Standby
+                mI2cDevice.writeRegByte(MODE_REG, (byte) 0x40);//0x40  Device in Software Standby
            // }
 
 
@@ -906,8 +913,7 @@ slave address will cause all haptic drivers to trigger the process  at the same 
 
     public void drv2605_useERM ()//Eccentric Rotating Mass, ERM
     {
-       // writeRegister8(DRV2605_REG_FEEDBACK, readRegister8(DRV2605_REG_FEEDBACK) & 0x7F);
-        if (mI2cDevice == null) {
+         if (mI2cDevice == null) {
             throw new IllegalStateException("DRV2605 - I2C device not open");
         }
         try {
@@ -920,8 +926,7 @@ slave address will cause all haptic drivers to trigger the process  at the same 
 
     public void drv2605_useLRA ()//Linear Resonant Actuator, LRA
     {
-        //  writeRegister8(DRV2605_REG_FEEDBACK, readRegister8(DRV2605_REG_FEEDBACK) | 0x80);
-        if (mI2cDevice == null) {
+         if (mI2cDevice == null) {
             throw new IllegalStateException("DRV2605 - I2C device not open");
         }
         try {
