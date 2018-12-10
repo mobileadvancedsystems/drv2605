@@ -300,7 +300,7 @@ slave address will cause all haptic drivers to trigger the process  at the same 
                 //N_ERM_LRA This bit sets the DRV2605 device in ERM or LRA mode. This bit should be set prior to running auto calibration. 0: ERM Mode 1: LRA Mode
                 //mI2cDevice.writeRegByte(FEEDBACK_CONTROL_REG, (byte) 0x00000000);//0x00 - Select ERM as opposed to LRA
                 //mI2cDevice.writeRegByte(CONTROL3_REG, (byte) 0x00100000);//ERM_OPEN_LOOP BIT to 1 - bit 5
-                mI2cDevice.writeRegByte(CONTROL3_REG, (byte) 0x20);//ERM_OPEN_LOOP BIT to 1 - bit 5
+                mI2cDevice.writeRegByte(CONTROL3_REG, (byte) 0xC5);//0xC5 generates 1.83 volts
 
                 // ERM open loop
 
@@ -320,11 +320,11 @@ slave address will cause all haptic drivers to trigger the process  at the same 
                 //RATED_VOLTAGE[7:0] 	— See the Rated Voltage Programming section for calculating the correct register value.
                 //mI2cDevice.writeRegByte(RATED_VOLTAGE_REG, (byte) EFFECT_LIBRARY_A__ERM_RATED_VOLTAGE);
                 //mI2cDevice.writeRegByte(RATED_VOLTAGE_REG, (byte) 0x3F);
-                mI2cDevice.writeRegByte(RATED_VOLTAGE_REG, (byte) 0x56);
+                mI2cDevice.writeRegByte(RATED_VOLTAGE_REG, (byte) 0xFF);//0x56 generates 1.10 volt for motor. Haptic motors work from 2V up to 5V
 
                 //OD_CLAMP[7:0] 	— See the Overdrive Voltage-Clamp Programming section for calculating the correct register value.
                 //mI2cDevice.writeRegByte(OVERDRIVE_CLAMP_VOLTAGE_REG, (byte) EFFECT_LIBRARY_A__ERM_OVERDRIVE_CLAMP_VOLTAGE);
-                mI2cDevice.writeRegByte(OVERDRIVE_CLAMP_VOLTAGE_REG, (byte) 0x90);
+                mI2cDevice.writeRegByte(OVERDRIVE_CLAMP_VOLTAGE_REG, (byte) 0xFF);//2.33 volts when set to 0xFF.
 
 
                 //AUTO_CAL_TIME[1:0] 	— A value of 3 is valid for most actuators.
