@@ -22,32 +22,38 @@ import hapticdrv2605.hapticdrv2605;
             //Play the effect
             hapticdrv2605_device.drv2605_go_enable();//Bit clears after played
 
+            int n=1;
             do {
-                byte status = hapticdrv2605_device.drv260x_GET_STATUS_REGISTER();
-                if ((status==(byte)0xE0)||(status==(byte)0xE4)) {
+                do {
+                    byte status = hapticdrv2605_device.drv260x_GET_STATUS_REGISTER();
+                    if ((status == (byte) 0xE0) || (status == (byte) 0xE4)) {
 
-                    Log.d("HAPTIC I2C", "I2C HAPTIC EFFECT NUMBER: " + effect);
+                        Log.d("HAPTIC I2C", "I2C HAPTIC EFFECT NUMBER: " + effect);
 
-                    // set the effect to play
-                    hapticdrv2605_device.drv2605_Play_Waveform((byte) effect);
-                    hapticdrv2605_device.SET_LIBRARYSELECT_REGISTER((byte) 0x00);// end waveform
+                        // set the effect to play
+                        hapticdrv2605_device.drv2605_Play_Waveform((byte) effect);
+                       //hapticdrv2605_device.SET_LIBRARYSELECT_REGISTER((byte) 0x00);// end waveform
 
-                    //Play the effect
-                    hapticdrv2605_device.drv2605_go_enable();//Bit clears after played
+                        //Play the effect
+                       hapticdrv2605_device.drv2605_go_enable();//Bit clears after played
 
-                    // wait a bit
-                    try {
-                        TimeUnit.MICROSECONDS.sleep(500);//wait 500 us
-                    } catch (Exception ex) {
+                        // wait a bit
+                        try {
+                            TimeUnit.MICROSECONDS.sleep(500);//wait 500 us
+                        } catch (Exception ex) {
+                        }
+                    } else {
+                        Log.d("HAPTIC I2C", "I2C Chipset not ready.");
                     }
-                }
-                else{
-                    Log.d("HAPTIC I2C", "I2C Chipset not ready.");
-                }
-                effect++;
+                    effect++;
 
+                }
+                while (effect <= 116);
+                n++;
             }
-            while (effect<=116);
+            while (n<=200);//Debug - pulse LED instead of motor to see if the motor is drawing to much current / needs more voltage.
+
+
         }
         catch (Exception ex){
             Log.d(TAG, "Haptic I2C - MainActivity - problem attaching to device.: " + ex.toString());
